@@ -1,5 +1,10 @@
 package edu.sjsu.cmpe.library;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+import javax.jms.JMSException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,16 +16,20 @@ import com.yammer.dropwizard.views.ViewBundle;
 import edu.sjsu.cmpe.library.api.resources.BookResource;
 import edu.sjsu.cmpe.library.api.resources.RootResource;
 import edu.sjsu.cmpe.library.config.LibraryServiceConfiguration;
+import edu.sjsu.cmpe.library.msg.Listener;
 import edu.sjsu.cmpe.library.repository.BookRepository;
 import edu.sjsu.cmpe.library.repository.BookRepositoryInterface;
 import edu.sjsu.cmpe.library.ui.resources.HomeResource;
 
 public class LibraryService extends Service<LibraryServiceConfiguration> {
+	
 
     private final Logger log = LoggerFactory.getLogger(getClass());
-
+    
     public static void main(String[] args) throws Exception {
 	new LibraryService().run(args);
+	
+
     }
 
     @Override
@@ -54,5 +63,22 @@ public class LibraryService extends Service<LibraryServiceConfiguration> {
 
 	/** UI Resources */
 	environment.addResource(new HomeResource(bookRepository));
+	final Listener listener = new Listener(configuration,bookRepository);
+	ExecutorService executor = Executors.newFixedThreadPool(1);
+    
+    Runnable backgroundTask = new Runnable() {
+
+	    @Override
+	    public void run() {
+		try {
+			listener.listener();
+		} catch (JMSException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	    }
+	    };
+	    executor.execute(backgroundTask);
+	    //listener.listener();
     }
 }

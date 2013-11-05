@@ -48,7 +48,9 @@ public interface BookRepositoryInterface {
      */
     void delete(Long isbn);
     
-    void producer(String tempMsg) throws JMSException;
+    Book updateBookStatus(Book book, Status status) throws JMSException;
 
-	Book updateBookStatus(Book book, Status status) throws JMSException;
+	void addBook(Book tempBook);
+
+	
 }

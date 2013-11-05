@@ -136,7 +136,7 @@ public void Publisher(ArrayList<String> arrivedBooks) throws JMSException{
 	String password = "password";
 	String host = "54.215.210.214";
 	int port = 61613;
-	String destination1 = "/topic/05452.book.*";
+	String destination1 = "/topic/05452.book.all";
 	String destination2 = "/topic/05452.book.computer";
 
 	StompJmsConnectionFactory factory = new StompJmsConnectionFactory();
@@ -157,17 +157,19 @@ public void Publisher(ArrayList<String> arrivedBooks) throws JMSException{
 		data = arrivedBooks.get(i);
 		TextMessage msg = session.createTextMessage(data);
 		msg.setLongProperty("id", System.currentTimeMillis());
-		producer_a.send(msg);
 		System.out.println("message sent to library_a");
-		if (data.split(":")[2].trim().equals("computer"))
+		producer_a.send(msg);		
+		if (data.split(":")[2].equals("\"computer\"")) {
+			System.out.println("message sent to library_b");
 			producer_b.send(msg);
 		System.out.println(data);	
+		}
 	}
 	/**
 	 * Notify all Listeners to shut down. if you don't signal them, they
 	 * will be running forever.
 	 */
-	producer_a.send(session.createTextMessage("SHUTDOWN"));
+	//producer_a.send(session.createTextMessage("SHUTDOWN"));
 	connection.close();
 
     }

@@ -8,6 +8,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 
 
+
+
+
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -30,6 +33,7 @@ import org.fusesource.stomp.jms.message.StompJmsMessage;
 import edu.sjsu.cmpe.library.config.LibraryServiceConfiguration;
 import edu.sjsu.cmpe.library.domain.Book;
 import edu.sjsu.cmpe.library.domain.Book.Status;
+import edu.sjsu.cmpe.library.msg.Producer;
 
 public class BookRepository implements BookRepositoryInterface {
     /** In-memory map to store books. (Key, Value) -> (ISBN, Book) */
@@ -44,11 +48,13 @@ public class BookRepository implements BookRepositoryInterface {
 	private int apolloPort;
 	private String stompQueue;
 	private String stompTopic;
+	private final Producer producer;
 
     public BookRepository(LibraryServiceConfiguration config) {
 	bookInMemoryMap = seedData();
 	this.configuration = config;
 	System.out.println("checkpoint");
+	this.producer = new Producer(config);
 	apolloUser = configuration.getApolloUser();
 	apolloPassword = configuration.getApolloPassword();
 	apolloHost = configuration.getApolloHost();
@@ -56,6 +62,12 @@ public class BookRepository implements BookRepositoryInterface {
 	stompQueue = configuration.getStompQueueName();
 	stompTopic = configuration.getStompTopicName();
 	System.out.println(apolloUser);
+	/*try {
+		listener();
+	} catch (JMSException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	}*/
 
 
 	isbnKey = 2;
@@ -123,7 +135,15 @@ public class BookRepository implements BookRepositoryInterface {
     public Book getBookByISBN(Long isbn) {
 	checkArgument(isbn > 0,
 		"ISBN was %s but expected greater than zero value", isbn);
-	return bookInMemoryMap.get(isbn);
+	if(bookInMemoryMap.containsKey(isbn)) {
+		//System.out.println("returning book..");
+		return bookInMemoryMap.get(isbn);
+	}
+	else {
+		//System.out.println("returning null");
+		Book book = new Book();
+		return book;
+	}
     }
 
     @Override
@@ -144,78 +164,27 @@ public class BookRepository implements BookRepositoryInterface {
 	bookInMemoryMap.remove(isbn);
     }
     
+    public void addBook(Book tempBook) {
+    	checkNotNull(tempBook, "newBook instance must not be null");
+    	System.out.println(tempBook.getTitle());
+    	bookInMemoryMap.put(tempBook.getIsbn(), tempBook);
+    }
+    
     @Override
     	public Book updateBookStatus(Book book, Status tempStatus) throws JMSException{
    		book.setStatus(tempStatus); 
-   		System.out.println("checkpint2");
+   		//System.out.println("checkpint2");
    		String libname;
-   		if(configuration.getStompTopicName().equals("/topic/05452.book.*"))
+   		if(configuration.getStompTopicName().equals("/topic/05452.book.all"))
    			libname = "library-a";
    		else
    			libname = "library-b";
-   		producer(libname+":"+book.getIsbn());
-   		System.out.println("checkpint3");
+   		producer.producer(libname+":"+book.getIsbn());
+   		//System.out.println("checkpint3");
     	return book;
     }
     
-    public void producer(String tempMsg) throws JMSException{
-    	System.out.println("checkpint4");
-    	StompJmsConnectionFactory factory = new StompJmsConnectionFactory();
-    	factory.setBrokerURI("tcp://" + apolloHost + ":" + apolloPort);
-    	System.out.println(factory.getBrokerURI());
 
-    	Connection connection = factory.createConnection(apolloUser, apolloPassword);
-    	connection.start();
-    	Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-    	Destination dest = new StompJmsDestination(stompQueue);
-    	MessageProducer producer = session.createProducer(dest);
-
-    	TextMessage msg = session.createTextMessage(tempMsg);
-    	msg.setLongProperty("id", System.currentTimeMillis());
-    	System.out.println(msg.getText());
-    	//}
-    	producer.send(msg);
-    	//producer.send(session.createTextMessage("SHUTDOWN"));
-    	connection.close();
-
-        }
-    
-    public void listener() throws JMSException {
-    	StompJmsConnectionFactory factory = new StompJmsConnectionFactory();
-    	factory.setBrokerURI("tcp://" + apolloHost + ":" + apolloPort);
-
-    	Connection connection = factory.createConnection(apolloUser, apolloPassword);
-    	connection.start();
-    	Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-    	Destination dest = new StompJmsDestination(stompTopic);
-
-    	MessageConsumer consumer = session.createConsumer(dest);
-    	System.currentTimeMillis();
-    	System.out.println("Waiting for messages...");
-    	while(true) {
-    	    Message msg = consumer.receive();
-    	    if( msg instanceof  TextMessage ) {
-    		String body = ((TextMessage) msg).getText();
-    		if( "SHUTDOWN".equals(body)) {
-    		    break;
-    		}
-    		System.out.println("Received message = " + body);
-
-    	    } else if (msg instanceof StompJmsMessage) {
-    		StompJmsMessage smsg = ((StompJmsMessage) msg);
-    		String body = smsg.getFrame().contentAsString();
-    		if ("SHUTDOWN".equals(body)) {
-    		    break;
-    		}
-    		System.out.println("Received message = " + body);
-
-    	    } else {
-    		System.out.println("Unexpected message type: "+msg.getClass());
-    	    }
-    	}
-    	connection.close();
-
-    }
 
 
 

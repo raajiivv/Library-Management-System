@@ -26,7 +26,7 @@ import org.fusesource.stomp.jms.message.StompJmsMessage;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
-@Every("6s")
+@Every("300s")
 public class ProcurementJobs extends Job {
 	private String apolloUser;
 	private String apolloPassword;

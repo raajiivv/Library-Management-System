@@ -88,7 +88,7 @@ public class BookResource {
 	    @DefaultValue("available") @QueryParam("status") Status status) throws JMSException {
 	Book book = bookRepository.getBookByISBN(isbn.get());
 	if (book.getStatus().equals(Status.available)) {
-		book = bookRepository.updateBookStatus(book, status);//book.setStatus(status);
+		book = bookRepository.updateBookStatus(book, status);
 	}
 	BookDto bookResponse = new BookDto(book);
 	String location = "/books/" + book.getIsbn();

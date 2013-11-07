@@ -1,5 +1,6 @@
 package edu.sjsu.cmpe.library.config;
 
+import org.hibernate.validator.constraints.NotBlank;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -26,7 +27,6 @@ public class LibraryServiceConfiguration extends Configuration {
     @JsonProperty
     private String apolloHost;
     
-    //@NotEmpty
     @JsonProperty
     private int apolloPort;
 

@@ -1,6 +1,6 @@
 package edu.sjsu.cmpe.library.ui.resources;
 
-import java.util.List;
+//import java.util.List;
 
 import javax.jms.JMSException;
 import javax.ws.rs.DefaultValue;
@@ -11,15 +11,11 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 
 import com.yammer.dropwizard.jersey.params.LongParam;
-import com.yammer.metrics.annotation.Timed;
 
 import edu.sjsu.cmpe.library.domain.Book;
 import edu.sjsu.cmpe.library.domain.Book.Status;
-import edu.sjsu.cmpe.library.dto.BookDto;
-import edu.sjsu.cmpe.library.dto.LinkDto;
 import edu.sjsu.cmpe.library.repository.BookRepositoryInterface;
 import edu.sjsu.cmpe.library.ui.views.HomeView;
 
@@ -34,7 +30,7 @@ public class HomeResource {
 
 @GET
 public HomeView getHome() {
-	List<Book> tempBooks = bookRepository.getAllBooks();
+	//List<Book> tempBooks = bookRepository.getAllBooks();
 	//tempBooks = tempBooks.
     return new HomeView(bookRepository.getAllBooks());
 	}

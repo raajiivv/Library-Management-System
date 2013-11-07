@@ -29,7 +29,6 @@ public class Producer {
 		
 	}
 	public void producer(String tempMsg) throws JMSException{
-    	System.out.println("checkpint4");
     	StompJmsConnectionFactory factory = new StompJmsConnectionFactory();
     	factory.setBrokerURI("tcp://" + apolloHost + ":" + apolloPort);
     	System.out.println(factory.getBrokerURI());
@@ -42,7 +41,7 @@ public class Producer {
 
     	TextMessage msg = session.createTextMessage(tempMsg);
     	msg.setLongProperty("id", System.currentTimeMillis());
-    	System.out.println(msg.getText());
+    	//System.out.println(msg.getText());
     	producer.send(msg);
     	connection.close();
 

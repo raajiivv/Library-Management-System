@@ -3,7 +3,7 @@ $(":button").click(function() {
 	alert('About to report lost on ISBN ' + isbn);
 	Callback(isbn);
 	$("#"+isbn).attr("disabled", "disabled");
-	
+	loaction.reload(true);
 });
 
 function Callback(isbn)
@@ -11,9 +11,13 @@ function Callback(isbn)
 	//alert(isbn);
 	$.ajax({
 	    type: "PUT",
-	    url: "http://localhost:8001/library/v1/books/"+isbn,
+	    url: "/library/v1/books/"+isbn+"/?status=lost",
 	    contentType: "application/json",
-	    data: {"status": "lost"}
+	    success: function(data) {
+            window.location.reload();
+    }	
 	});
 	$(status).text("lost")
+	
+	
 }

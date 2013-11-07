@@ -82,6 +82,5 @@ public class LibraryService extends Service<LibraryServiceConfiguration> {
 	    }
 	    };
 	    executor.execute(backgroundTask);
-	    //listener.listener();
     }
 }

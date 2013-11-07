@@ -3,32 +3,13 @@ package edu.sjsu.cmpe.library.repository;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-
-
-
-
-
-
-
-
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.jms.Connection;
-import javax.jms.Destination;
 import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.MessageConsumer;
-import javax.jms.MessageProducer;
-import javax.jms.Session;
-import javax.jms.TextMessage;
-
-import org.fusesource.stomp.jms.StompJmsConnectionFactory;
-import org.fusesource.stomp.jms.StompJmsDestination;
-import org.fusesource.stomp.jms.message.StompJmsMessage;
 
 import edu.sjsu.cmpe.library.config.LibraryServiceConfiguration;
 import edu.sjsu.cmpe.library.domain.Book;
@@ -42,12 +23,6 @@ public class BookRepository implements BookRepositoryInterface {
 
     /** Never access this key directly; instead use generateISBNKey() */
     private long isbnKey;
-	private String apolloUser;
-	private String apolloPassword;
-	private String apolloHost;
-	private int apolloPort;
-	private String stompQueue;
-	private String stompTopic;
 	private final Producer producer;
 
     public BookRepository(LibraryServiceConfiguration config) {
@@ -55,21 +30,7 @@ public class BookRepository implements BookRepositoryInterface {
 	this.configuration = config;
 	System.out.println("checkpoint");
 	this.producer = new Producer(config);
-	apolloUser = configuration.getApolloUser();
-	apolloPassword = configuration.getApolloPassword();
-	apolloHost = configuration.getApolloHost();
-	apolloPort = configuration.getApolloPort();
-	stompQueue = configuration.getStompQueueName();
-	stompTopic = configuration.getStompTopicName();
-	System.out.println(apolloUser);
-	/*try {
-		listener();
-	} catch (JMSException e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
-	}*/
-
-
+	
 	isbnKey = 2;
     }
 
@@ -136,11 +97,9 @@ public class BookRepository implements BookRepositoryInterface {
 	checkArgument(isbn > 0,
 		"ISBN was %s but expected greater than zero value", isbn);
 	if(bookInMemoryMap.containsKey(isbn)) {
-		//System.out.println("returning book..");
 		return bookInMemoryMap.get(isbn);
 	}
 	else {
-		//System.out.println("returning null");
 		Book book = new Book();
 		return book;
 	}
@@ -166,26 +125,19 @@ public class BookRepository implements BookRepositoryInterface {
     
     public void addBook(Book tempBook) {
     	checkNotNull(tempBook, "newBook instance must not be null");
-    	System.out.println(tempBook.getTitle());
+    	//System.out.println(tempBook.getTitle());
     	bookInMemoryMap.put(tempBook.getIsbn(), tempBook);
     }
     
     @Override
     	public Book updateBookStatus(Book book, Status tempStatus) throws JMSException{
    		book.setStatus(tempStatus); 
-   		//System.out.println("checkpint2");
    		String libname;
    		if(configuration.getStompTopicName().equals("/topic/05452.book.all"))
    			libname = "library-a";
    		else
    			libname = "library-b";
    		producer.producer(libname+":"+book.getIsbn());
-   		//System.out.println("checkpint3");
     	return book;
     }
-    
-
-
-
-
 }

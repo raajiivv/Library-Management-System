@@ -1,6 +1,6 @@
 <html>
         <head>
-            <title>Home</title>
+            <title>Library</title>
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <!-- Latest compiled and minified CSS -->
             <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" media="screen">
@@ -15,13 +15,12 @@
                     {{#books}}
                         <tr>
                             <td>{{isbn}}</td>
-							<td><img class="img-thumbnail" height="92" width="72" src="{{coverimage}}"></td>
-							<td>{{title}}</td>
-							<td>{{category}}</td>
-							<td>{{status}}</td>
-							
+                            <td><img class="img-thumbnail" height="92" width="72" src="{{coverimage}}"></td>
+                            <td>{{title}}</td>
+                            <td>{{category}}</td>
+                            <td>{{status}}</td>
 							<td><button id="{{isbn}}" type="button" class="btn btn-primary">Report Lost</button></td>
-							
+                                                        
                         </tr>
                     {{/books}}
                     </table>
@@ -29,11 +28,18 @@
             </div> <!-- end of container -->
            
             <!-- script tags -->
-            
+            <script type="text/javascript">
+  			var timeout = setTimeout("location.reload(true);",10000);
+  			</script>
+  			<script type="text/javascript">
+  			$((status).text("lost",true)).attr("disabled", "disabled");
+  			</script>
             <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
             <script src="//code.jquery.com/jquery.js"></script>
             <!-- Latest compiled and minified JavaScript -->
             <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
             <script src="../assets/js/app.js"></script>
+            <script src="../assets/js/listener.js"></script>
+            <script src="../assets/js/stomp.js"></script> 
         </body>
 </html>
